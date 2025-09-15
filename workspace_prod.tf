@@ -9,8 +9,6 @@ provider "databricks" {
   # Authenticate using environment variables: https://registry.terraform.io/providers/databricks/databricks/latest/docs#argument-reference
   # export DATABRICKS_CLIENT_ID=CLIENT_ID
   # export DATABRICKS_CLIENT_SECRET=CLIENT_SECRET
-  client_id     = "7033afcf-c362-4b82-b4c8-33c4da9f1fd2"
-  client_secret = "dose8e7af7277a797c088687bbb026dae287"
 }
 
 
