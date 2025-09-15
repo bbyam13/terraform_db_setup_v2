@@ -1,0 +1,20 @@
+# Terraform Variables Example File
+# Copy this file to terraform.tfvars and fill in your actual values
+
+# Account Configuration
+admin_user = "your-admin-email@company.com"
+executor_application_id = "your-executor-app-id"
+aws_account_id = "your-aws-account-id"
+databricks_account_id = "your-databricks-account-id"
+
+# Infrastructure Configuration
+region = "us-east-1"  # Change to your preferred region
+metastore_name = "your-metastore-name"
+
+# Optional: Databricks provider host (uses default if not specified)
+# databricks_provider_host = "https://accounts.cloud.databricks.com"
+
+# Telemetry Configuration (optional - set to null to disable)
+telemetry_bucket_name = "your-telemetry-bucket"        # or null
+telemetry_location_name = "your-telemetry-location"    # or null
+telemetry_bucket_env_prefix = "your-env-prefix"        # or null
