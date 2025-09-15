@@ -168,6 +168,7 @@ resource "databricks_catalog" "workspace_catalog" {
   name           = local.uc_catalog_name_us
   comment        = "This catalog is for workspace - ${var.workspace_id}"
   storage_root   = "s3://${var.uc_catalog_name}/"
+  isolation_mode = "OPEN"
   properties = {
     purpose = "Catalog for workspace - ${var.workspace_id}"
   }

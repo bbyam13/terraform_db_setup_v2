@@ -332,11 +332,6 @@ variable "scc_relay_config" {
   }
 }
 
-variable "sg_egress_ports" {
-  description = "List of egress ports for security groups."
-  type        = list(string)
-}
-
 variable "shared_datasets_bucket" {
   description = "Shared datasets bucket for VPC endpoint policy."
   type        = map(string)

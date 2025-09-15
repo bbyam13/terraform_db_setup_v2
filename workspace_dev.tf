@@ -36,7 +36,6 @@ module "dev_workspace" {
   vpc_cidr_range                  = "10.0.0.0/18"
   private_subnets_cidr            = ["10.0.0.0/22", "10.0.4.0/22"]
   public_subnets_cidr             = ["10.0.12.0/22", "10.0.16.0/22"]
-  sg_egress_ports                 = ["80", "53", "443", "2443", "6666", "8443", "8444", "8445", "8446", "8447", "8448", "8449", "8450", "8451"]
   telemetry_bucket_env_prefix     = "dev"
   databricks_gov_shard            = null
 }

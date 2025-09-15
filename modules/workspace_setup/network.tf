@@ -60,24 +60,11 @@ resource "aws_security_group" "sg" {
     }
   }
 
-
-  dynamic "egress" {
-    for_each = var.sg_egress_ports
-    content {
-      description = "Databricks Workspace SG - Egress Ports"
-      from_port   = egress.value
-      to_port     = egress.value
-      protocol    = "tcp"
-      cidr_blocks = ["0.0.0.0/0"] 
-    }
-  }
-
-  # DNS resolution
+  # Open Egress
   egress {
-    description = "DNS Resolution"
-    from_port   = 53
-    to_port     = 53
-    protocol    = "udp"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
