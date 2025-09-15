@@ -6,12 +6,23 @@ This Terraform project automates the deployment of a Databricks environment on A
 
 The project is organized as a unified Terraform deployment that creates account-level resources (Unity Catalog metastore and account groups), telemetry data infrastructure, and workspace deployment in a single coordinated process. The deployment creates foundational resources that are shared across workspaces - the Unity Catalog metastore and account groups, infrastructure for accessing telemetry data from an existing S3 bucket with a Unity Catalog external location, and workspaces with customer managed VPC along with associated UC catalogs with multiple schemas and permissions for the account groups. It is designed to handle deploying several workspaces within the same account using the same Unity Catalog metastore.
 
+### Setup 
+1. Set variables in `terraform.tfvars`:
+   - **aws_account_id**: aws account id for deployment
+   - **region**: aws region for deployment
+   - **admin_user**: Admin user email for workspaces and catalog management
+   - **metastore_name**: Unity Catalog metastore name
+   - **executor_application_id**: The service principal executing the terraform
+   - **databricks_account_id**: databricks account id
+   - **telemetry_bucket_name**: S3 Bucket where telemetry data resides
+   - **telemetry_location_name**: name of Unity Catalog External location that connects to the telemetry bucket
+
 
 ### Deployment Process
 
 1. **Configure Variables**
    - Set your account level configuration values in `terraform.tfvars`
-   - For deployment without telemetry: set `telemetry_location_name = null`
+   - For deployment without telemetry: set `telemetry_bucket_name = null`
 
 2. **Multi-Workspace Deployment**
    - use the example file 'dev_workspace.tfvars' to deploy a workspace. Once you have added the module with the required configurations,  you can just apply the terraform again.
@@ -22,7 +33,7 @@ The project is organized as a unified Terraform deployment that creates account-
 3. **Workspace Destory**
    - To destory a worksapce, destory the specific workspace module
    ```bash
-   terraform destroy -target=module.dev_workspace)
+   terraform destroy -target=module.dev_workspace
    ```
 
 
