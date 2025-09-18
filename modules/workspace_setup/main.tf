@@ -10,6 +10,7 @@ module "databricks_mws_workspace" {
   databricks_account_id = var.databricks_account_id
   resource_prefix       = var.resource_prefix
   region                = var.region
+  deployment_name       = var.deployment_name
 
   # Network Configuration
   vpc_id             = var.custom_vpc_id != null ? var.custom_vpc_id : module.vpc.vpc_id
@@ -69,6 +70,7 @@ module "unity_catalog_catalog_creation" {
   cmk_admin_arn                = var.cmk_admin_arn == null ? "arn:${local.computed_aws_partition}:iam::${var.aws_account_id}:root" : var.cmk_admin_arn
   workspace_id                 = module.databricks_mws_workspace.workspace_id
   user_workspace_catalog_admin = var.admin_user
+  catalog_isolation_mode       = var.catalog_isolation_mode
 
   depends_on = [module.unity_catalog_metastore_assignment]
 }
