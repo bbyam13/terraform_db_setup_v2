@@ -3,7 +3,7 @@ resource "databricks_service_principal" "job_executor_sp" {
   provider     = databricks.created_workspace
   display_name = "${var.resource_prefix}-job-executor-sp"
   active       = true
-  
+  disable_as_user_deletion = false
   depends_on = [module.databricks_mws_workspace]
 }
 
@@ -13,4 +13,5 @@ resource "databricks_mws_permission_assignment" "sp_workspace_admin" {
   workspace_id   = module.databricks_mws_workspace.workspace_id
   principal_id   = databricks_service_principal.job_executor_sp.id
   permissions    = ["ADMIN"]
+  depends_on = [module.unity_catalog_metastore_assignment]
 }
