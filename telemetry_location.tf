@@ -69,8 +69,13 @@ resource "databricks_storage_credential" "telemetry_storage_credential" {
   }
   comment       = "Managed by TF"
   force_destroy = true
+  # Protect shared telemetry location from accidental deletion
+  lifecycle {
+    prevent_destroy = true
+  }
   depends_on = [
-    module.dev_workspace.databricks_host # requires workspace to be created first
+    module.dev_workspace.databricks_host, # requires workspace to be created first
+    module.dev_workspace.metastore_assignment # requires metastore assignment to be created first
   ]
 }
 
@@ -90,10 +95,16 @@ resource "databricks_external_location" "telemetry_location" {
     managed_sqs {} # databricks will create the SQS queue for file events
   }
 
+  # Protect shared telemetry location from accidental deletion
+  lifecycle {
+    prevent_destroy = true
+  }
+
   depends_on = [
     databricks_storage_credential.telemetry_storage_credential,
     data.aws_s3_bucket.bucket,
     aws_iam_role_policy_attachment.telemetry_access_role_policy_attachment,
-    module.dev_workspace.databricks_host # requires workspace to be created first
+    module.dev_workspace.databricks_host, # requires workspace to be created first
+    module.dev_workspace.metastore_assignment # requires metastore assignment to be created first
   ]
 }
