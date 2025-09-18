@@ -6,36 +6,160 @@ This Terraform project automates the deployment of a Databricks environment on A
 
 The project is organized as a unified Terraform deployment that creates account-level resources (Unity Catalog metastore and account groups), telemetry data infrastructure, and workspace deployment in a single coordinated process. The deployment creates foundational resources that are shared across workspaces - the Unity Catalog metastore and account groups, infrastructure for accessing telemetry data from an existing S3 bucket with a Unity Catalog external location, and workspaces with customer managed VPC along with associated UC catalogs with multiple schemas and permissions for the account groups. It is designed to handle deploying several workspaces within the same account using the same Unity Catalog metastore.
 
-### Setup 
-1. Set variables in `terraform.tfvars`:
-   - **aws_account_id**: aws account id for deployment
-   - **region**: aws region for deployment
-   - **admin_user**: Admin user email for workspaces and catalog management
-   - **metastore_name**: Unity Catalog metastore name
-   - **executor_application_id**: The service principal executing the terraform
-   - **databricks_account_id**: databricks account id
-   - **telemetry_bucket_name**: S3 Bucket where telemetry data resides
-   - **telemetry_location_name**: name of Unity Catalog External location that connects to the telemetry bucket
+## Setup
+
+### Prerequisites
+- **Terraform** installed
+- **AWS CLI** 
+- **Databricks CLI** 
+- **Databricks Service Principal** created in Databricks account for automation with Account Admin access
+
+### 2. Authentication with AWS and Databricks
+
+#### AWS Authentication
+Configure AWS credentials using one of these methods:
+
+```bash
+# Option 1: AWS CLI configure
+aws configure
+# Enter your AWS Access Key ID, Secret Access Key, region, and output format
+
+# Option 2: Environment variables
+export AWS_ACCESS_KEY_ID="your-access-key-id"
+export AWS_SECRET_ACCESS_KEY="your-secret-access-key"
+export AWS_DEFAULT_REGION="us-east-2"
+
+# Option 3: AWS Profile (if using multiple accounts)
+export AWS_PROFILE="your-profile-name"
+
+# Verify AWS authentication
+aws sts get-caller-identity
+```
+
+#### Databricks Authentication
+Set up Databricks authentication using environment variables:
+
+```bash
+export DATABRICKS_CLIENT_ID="your-service-principal-client-id"
+export DATABRICKS_CLIENT_SECRET="your-service-principal-client-secret"
+```
 
 
-### Deployment Process
 
-1. **Configure Variables**
-   - Set your account level configuration values in `terraform.tfvars`
-   - For deployment without telemetry: set `telemetry_bucket_name = null`
+### 3. Configure Variables
 
-2. **Multi-Workspace Deployment**
-   - use the example file 'dev_workspace.tfvars' to deploy a workspace. Once you have added the module with the required configurations,  you can just apply the terraform again.
-   ```bash
-   terraform apply
-   ```
-   
-3. **Workspace Destory**
-   - To destory a worksapce, destory the specific workspace module
-   ```bash
-   terraform destroy -target=module.dev_workspace
-   ```
+Edit `terraform.tfvars` with your specific values:
 
+```hcl
+# =============================================================================
+# AWS Configuration
+# =============================================================================
+aws_account_id = "123456789012"           # Your AWS account ID
+region = "us-east-2"                      # Your preferred AWS region
+
+# =============================================================================
+# Databricks Configuration  
+# =============================================================================
+admin_user = "your-email@company.com"     # Your admin email
+metastore_name = "your-metastore-name"    # Unity Catalog metastore name
+executor_application_id = "abc123..."     # Service principal app ID
+databricks_account_id = "xyz789..."       # Your Databricks account ID
+
+# =============================================================================
+# Telemetry Configuration (Optional)
+# =============================================================================
+telemetry_bucket_name = "your-telemetry-bucket"    # Set to null to disable
+telemetry_location_name = "telemetry-location"     # External location name
+```
+
+### 4. Deploy Infrastructure
+
+```bash
+# Initialize Terraform
+terraform init
+
+# Review the deployment plan
+terraform plan
+
+# Deploy the infrastructure
+terraform apply
+```
+
+### 5.  Add and Destroy Workspaces
+
+#### Add a new workspace
+  1. Add a new workspace provider in `providers.tf`
+
+  ```hcl
+    provider "databricks" {
+      alias      = "STAGE_workspace"
+      host       = module.STAGE_workspace.databricks_host #this must match the module name
+      account_id = var.databricks_account_id
+    }
+  ```
+
+  2. Copy a sample workspace file - `workspace_dev.tf`
+  3. Modify the file for specs of the new workspace
+
+  ```hcl
+    module "STAGE_workspace" { #update to unique name
+        
+        ......
+          
+          databricks.created_workspace = databricks.STAGE_workspace 
+        
+        .......
+
+        #variables per workspace
+        resource_prefix                 = "byam-STAGE" #name of the workspace
+        deployment_name                 = "byam-STAGE" #url of workspace 
+        telemetry_bucket_env_prefix     = "STAGE"  # bucket prefix
+        
+        #Whether the catalog is accessible from all workspaces or a specific set of workspaces
+        catalog_isolation_mode          = "OPEN"
+      
+      .......
+
+      #workspace specific outputs
+      output "STAGE_workspace_url" { #update this to match the module name
+        value       = module.STAGE_workspace.databricks_host #update this to match the module nam
+
+      .......
+
+      output "STAGE_workspace_service_principal_id" { #update this to match the module name
+        value       = module.STAGE_workspace.service_principal_application_id #update this to match the module name
+  ```
+  
+  4. Deploy 
+  ```bash
+# Review the deployment plan
+terraform plan
+
+# Deploy the new workspace resources
+terraform apply
+```
+#### Destroy a workspace
+
+1. Target Destory the specific workspace module to delete
+```bash
+
+# Review the deployment plan
+terraform plan -destroy -target=module.prod_workspace
+
+# Deploy the new workspace resources
+tterraform plan -destroy -target=module.prod_workspace
+```
+
+**PLEASE NOTE**: The resources for accessing the telemetry bucket are dependent on an existing workspace. Currently, `telemetry_location.tf` is setup to depend on `workspace_dev` to handle this. Therefore, attempting to delete the module `workspace_dev` would trigger a delete of the telemery bucket access. (This is blocked by lifecycle rules)
+
+
+**WARNING: The command `terrafrom destroy` WILL ATTEMPT TO DELETE ALL RESOURCES**
+
+
+
+
+
+## Archictecture
 
 ### 1. Account Level Configuration
 
