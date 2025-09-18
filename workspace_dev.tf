@@ -1,17 +1,6 @@
 # =============================================================================================
 # Workspace Setup: Dev Environment
 # =============================================================================================
-provider "databricks" {
-  alias      = "dev_workspace"
-  host       = module.dev_workspace.databricks_host
-  account_id = var.databricks_account_id
-  
-  # Authenticate using environment variables: https://registry.terraform.io/providers/databricks/databricks/latest/docs#argument-reference
-  # export DATABRICKS_CLIENT_ID=CLIENT_ID
-  # export DATABRICKS_CLIENT_SECRET=CLIENT_SECRET
-}
-
-
 module "dev_workspace" {
   source = "./modules/workspace_setup"
 
@@ -31,23 +20,28 @@ module "dev_workspace" {
   telemetry_bucket_name           = var.telemetry_bucket_name
   account_groups                  = databricks_group.groups
 
-  #variables per workspace 
-  resource_prefix                 = "byam-dev" #name of the workspace
+  #networking config
   vpc_cidr_range                  = "10.0.0.0/18"
   private_subnets_cidr            = ["10.0.0.0/22", "10.0.4.0/22"]
   public_subnets_cidr             = ["10.0.12.0/22", "10.0.16.0/22"]
-  telemetry_bucket_env_prefix     = "dev"
   databricks_gov_shard            = null
+
+  #variables per workspace
+  resource_prefix                 = "byam-dev" #name of the workspace
+  deployment_name                 = "byam-dev" #url of workspace (<deployment_prefix>-<deployment_name>.cloud.databricks.com)
+  telemetry_bucket_env_prefix     = "dev"
+  #Whether the catalog is accessible from all workspaces or a specific set of workspaces (ISOLATED or OPEN): https://registry.tf-registry-prod-use1.terraform.io/providers/databricks/databricks/latest/docs/resources/catalog
+  catalog_isolation_mode          = "OPEN"
 }
 
 #workspace specific outputs
-output "dev_workspace_url" {
-  value       = module.dev_workspace.databricks_host
+output "dev_workspace_url" { #update this to match the module name
+  value       = module.dev_workspace.databricks_host #update this to match the module nam
   description = "Databricks workspace URL"
 }
 
-output "dev_workspace_service_principal_id" {
-  value       = module.dev_workspace.service_principal_application_id
+output "dev_workspace_service_principal_id" { #update this to match the module name
+  value       = module.dev_workspace.service_principal_application_id #update this to match the module nam
   description = "Service principal application ID for the workspace"
 }
 
