@@ -45,3 +45,9 @@ variable "workspace_id" {
   description = "workspace ID of deployed workspace."
   type        = string
 }
+
+variable "catalog_isolation_mode" {
+  description = "Whether the catalog is accessible from all workspaces or a specific set of workspaces (ISOLATED or OPEN)"
+  type        = string
+  default     = "ISOLATED"
+}

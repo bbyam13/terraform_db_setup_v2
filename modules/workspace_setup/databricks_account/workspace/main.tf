@@ -7,7 +7,6 @@ resource "null_resource" "previous" {}
 
 resource "time_sleep" "wait_60_seconds" {
   depends_on = [null_resource.previous]
-
   create_duration = "60s"
 }
 
@@ -34,6 +33,11 @@ resource "databricks_mws_networks" "this" {
   vpc_id             = var.vpc_id
 }
 
+resource "time_sleep" "wait_60_seconds_for_workspace" {
+  depends_on = [databricks_mws_credentials.this, databricks_mws_networks.this]
+  create_duration = "60s"
+}
+
 # Workspace Configuration with Deployment Name
 resource "databricks_mws_workspaces" "workspace" {
   account_id                               = var.databricks_account_id
@@ -42,8 +46,9 @@ resource "databricks_mws_workspaces" "workspace" {
   credentials_id                           = databricks_mws_credentials.this.credentials_id
   storage_configuration_id                 = databricks_mws_storage_configurations.this.storage_configuration_id
   network_id                               = databricks_mws_networks.this.network_id
-  pricing_tier                             = "PREMIUM"
+  pricing_tier                             = "ENTERPRISE"
+  deployment_name                          = var.deployment_name
   is_no_public_ip_enabled                  = true  # Enable Secure Cluster Connectivity (SCC)
 
-  depends_on = [databricks_mws_networks.this]
+  depends_on = [databricks_mws_networks.this, time_sleep.wait_60_seconds_for_workspace]
 }

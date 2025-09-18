@@ -1,3 +1,9 @@
+variable "catalog_isolation_mode" {
+  description = "Whether the catalog is accessible from all workspaces or a specific set of workspaces (ISOLATED or OPEN)"
+  type        = string
+  default     = "ISOLATED"
+}
+
 variable "admin_user" {
   description = "Email of the admin user for the workspace and workspace catalog."
   type        = string
